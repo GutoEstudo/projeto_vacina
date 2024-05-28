@@ -1,62 +1,8 @@
-As tabelas não são criadas automaticamente, para facilitar segue os comandos SQL: 
 
-CREATE TABLE IF NOT EXISTS `projeto_vacina`.`Localizacao` (
- `cod_ibge` INT NOT NULL,
- `estado` VARCHAR(45) NOT NULL,
- `nome_cidade` VARCHAR(45) NOT NULL,
- `regiao` VARCHAR(45) NOT NULL,
- PRIMARY KEY (`cod_ibge`))
+Este é um projeto de estudo de banco de dados, o qual simula um gerenciador de aplicação de vacinas. As informações relacionadas a vacinação de pessoas são inseridas pelo aplicativo e são salvas em um banco de dados
 
- CREATE TABLE IF NOT EXISTS `projeto_vacina`.`Pessoa` (
- `cpf` VARCHAR(11) NOT NULL,
- `nome` VARCHAR(45) NOT NULL,
- `idade` INT NOT NULL,
- `escolaridade` VARCHAR(45) NOT NULL,
- `localizacao` INT NULL,
- PRIMARY KEY (`cpf`),
- INDEX `localizacao_pessoa_fk_idx` (`localizacao` ASC) VISIBLE,
- CONSTRAINT `localizacao_pessoa_fk`
- FOREIGN KEY (`localizacao`)
-REFERENCES `projeto_vacina`.`Localizacao` (`cod_ibge`)
- ON DELETE NO ACTION
- ON UPDATE NO ACTION)
-
- CREATE TABLE IF NOT EXISTS `projeto_vacina`.`Vacina` (
- `id_vacina` INT NOT NULL AUTO_INCREMENT,
- `doenca` VARCHAR(45) NULL,
- `num_lote` INT NOT NULL,
- `qtd_doses` INT NOT NULL,
- PRIMARY KEY (`id_vacina`))
-
- CREATE TABLE IF NOT EXISTS `projeto_vacina`.`Recebe` (
- `id_vacina` INT NOT NULL,
- `cpf` VARCHAR(11) NOT NULL,
- `localizacao` INT NOT NULL,
- `nome_profissional` VARCHAR(45) NULL,
- `data` DATE NOT NULL,
- INDEX `vacina_fk_idx` (`id_vacina` ASC) VISIBLE,
- INDEX `cpf_fk_idx` (`cpf` ASC) VISIBLE,
- INDEX `localizacao_fk_idx` (`localizacao` ASC) VISIBLE,
- PRIMARY KEY (`id_vacina`, `cpf`, `localizacao`),
- CONSTRAINT `vacina_fk`
- FOREIGN KEY (`id_vacina`)
- REFERENCES `projeto_vacina`.`Vacina` (`id_vacina`)
- ONDELETENOACTION
- ONUPDATENOACTION,
- CONSTRAINT `cpf_fk`
- FOREIGN KEY (`cpf`)
- REFERENCES `projeto_vacina`.`Pessoa` (`cpf`)
- ONDELETENOACTION
- ONUPDATENOACTION,
- CONSTRAINT `localizacao_fk`
- FOREIGN KEY (`localizacao`)
- REFERENCES `projeto_vacina`.`Localizacao` (`cod_ibge`)
- ONDELETENOACTION
- ONUPDATENOACTION)
-
- Temos a entidade vacina, que possui
- o número do lote que identifica o lote na qual ela foi distribuída, para caso ocorra um
- problema relacionado ao lote, possamos saber quem foi afetado. Outro atributo da
+O banco de dados está organizado de forma que exista a entidade vacina, que possui o número do lote. Esse número identifica o lote no qual a vacina foi distribuída, para caso ocorra um
+ problema, possamos saber quem foi afetado. Outro atributo da
  entidade vacina é seu id, que é gerado automaticamente ao ser inserida uma nova
  vacina no banco de dados e o nome da doença que a vacina ajuda a curar. Já na
  entidade pessoa, temos alguns atributos básicos para saber informações sobre a
@@ -72,3 +18,61 @@ REFERENCES `projeto_vacina`.`Localizacao` (`cod_ibge`)
  tabela que representa uma relação entre essas três entidades mencionadas, que é
  uma tabela de histórico de recebimento de vacina, que conta com os identificadores
  únicos das outras tabelas (local, pessoa, id da vacina).
+
+As tabelas não são criadas automaticamente, para facilitar segue os comandos SQL: 
+
+``` sql 
+CREATE TABLE `Localizacao` (
+ `cod_ibge` INT NOT NULL,
+ `estado` VARCHAR(45) NOT NULL,
+ `nome_cidade` VARCHAR(45) NOT NULL,
+ `regiao` VARCHAR(45) NOT NULL,
+ PRIMARY KEY (`cod_ibge`))
+
+ CREATE TABLE `Pessoa` (
+ `cpf` VARCHAR(11) NOT NULL,
+ `nome` VARCHAR(45) NOT NULL,
+ `idade` INT NOT NULL,
+ `escolaridade` VARCHAR(45) NOT NULL,
+ `localizacao` INT NULL,
+ PRIMARY KEY (`cpf`),
+ INDEX `localizacao_pessoa_fk_idx` (`localizacao` ASC) VISIBLE,
+ CONSTRAINT `localizacao_pessoa_fk`
+ FOREIGN KEY (`localizacao`)
+REFERENCES `projeto_vacina`.`Localizacao` (`cod_ibge`)
+ ON DELETE NO ACTION
+ ON UPDATE NO ACTION)
+
+ CREATE TABLE `Vacina` (
+ `id_vacina` INT NOT NULL AUTO_INCREMENT,
+ `doenca` VARCHAR(45) NULL,
+ `num_lote` INT NOT NULL,
+ `qtd_doses` INT NOT NULL,
+ PRIMARY KEY (`id_vacina`))
+
+ CREATE TABLE `Recebe` (
+ `id_vacina` INT NOT NULL,
+ `cpf` VARCHAR(11) NOT NULL,
+ `localizacao` INT NOT NULL,
+ `nome_profissional` VARCHAR(45) NULL,
+ `data` DATE NOT NULL,
+ INDEX `vacina_fk_idx` (`id_vacina` ASC) VISIBLE,
+ INDEX `cpf_fk_idx` (`cpf` ASC) VISIBLE,
+ INDEX `localizacao_fk_idx` (`localizacao` ASC) VISIBLE,
+ PRIMARY KEY (`id_vacina`, `cpf`, `localizacao`),
+ CONSTRAINT `vacina_fk`
+ FOREIGN KEY (`id_vacina`)
+ REFERENCES `Vacina` (`id_vacina`)
+ ON DELETE NO ACTION
+ ON UPDATE NO ACTION,
+ CONSTRAINT `cpf_fk`
+ FOREIGN KEY (`cpf`)
+ REFERENCES `Pessoa` (`cpf`)
+ ON DELETE NO ACTION
+ ON UPDATE NO ACTION,
+ CONSTRAINT `localizacao_fk`
+ FOREIGN KEY (`localizacao`)
+ REFERENCES `Localizacao` (`cod_ibge`)
+ ON DELETE NO ACTION
+ ON UPDATE NO ACTION)
+```
